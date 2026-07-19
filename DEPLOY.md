@@ -80,3 +80,8 @@
 - Set ADMIN_PASSWORD, AUTH_SECRET, and CF_API_TOKEN.
 - Add the Pages route and deploy from GitHub.
 - Confirm DNS records create/update/delete successfully through the Cloudflare API.
+
+## Lazy Schema Init
+- On the first request, the app checks whether root_domains exists.
+- If not, it runs the full schema automatically with D1.exec().
+- This avoids manual first-run SQL execution.

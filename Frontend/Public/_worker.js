@@ -1,5 +1,7 @@
 export async function onRequest({ request, env }) {
   const url = new URL(request.url);
+  const { ensureSchema } = await import('../../src/schema-init.js');
+  await ensureSchema(env);
   const { ensureSession } = await import('../../src/auth.js');
   const session = await ensureSession(request, env);
   if (session instanceof Response) return session;
