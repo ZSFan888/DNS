@@ -92,3 +92,8 @@
 
 ## Profile Page
 - The My Info panel shows current user id, role, owned subdomains, grants, and session expiration.
+
+## Password Change
+- Add the users table for password_hash storage.
+- The profile page includes old/new password fields.
+- Password changes are handled by POST /api/password.
