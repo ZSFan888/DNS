@@ -3,7 +3,6 @@ export async function onRequest({ request, env }) {
   const { ensureSchema } = await import('../../src/schema-init.js');
   await ensureSchema(env);
   if (url.pathname === '/api/auth/login') return (await import('../../src/api-auth.js')).onRequestPost({ request, env });
-  if (url.pathname === '/index.html' || url.pathname === '/') return new Response(await (await fetch(new URL('/index.html', request.url), {cf:{cacheTtl:0}})).text(), { headers: { 'content-type': 'text/html;charset=UTF-8' } });
   const { ensureSession } = await import('../../src/auth.js');
   const session = await ensureSession(request, env);
   if (session instanceof Response) return session;
@@ -22,5 +21,5 @@ export async function onRequest({ request, env }) {
   if (url.pathname.startsWith('/api/dns-records/')) { const mod = await import('../../src/api-dns-records.js'); if (request.method === 'PUT') return mod.onRequestPut({ request, env, session }); if (request.method === 'DELETE') return mod.onRequestDelete({ request, env, session }); }
   if (url.pathname === '/api/dns-records/search') return (await import('../../src/api-dns-records-search.js')).onRequestGet({ request, env, session });
   if (url.pathname === '/api/bulk-records') return (await import('../../src/api-bulk-records.js')).onRequestPost({ request, env, session });
-  return new Response('Not found', { status: 404 });
+  return env.ASSETS.fetch(request);
 }
