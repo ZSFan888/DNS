@@ -11,3 +11,12 @@
 
 ## 部署
 请查看 [DEPLOY.md](./DEPLOY.md)。
+
+
+## Runtime notes
+- D1 is bound as DB in Pages.
+- Pages Functions should receive the session cookie dns_session.
+- CF_API_TOKEN must only have DNS edit access for the selected zones.
+
+## Pages setup
+See [PAGES-SETUP.md](./PAGES-SETUP.md).

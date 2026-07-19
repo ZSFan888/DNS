@@ -72,3 +72,11 @@
 ## Pagination
 - Audit logs use LIMIT + OFFSET with a small page size.
 - The user console queries /api/my-subdomains to avoid leaking other tenants.
+
+
+## Production Checklist
+- Create a D1 database and bind it as DB.
+- Run the schema in src/schema.sql.
+- Set ADMIN_PASSWORD, AUTH_SECRET, and CF_API_TOKEN.
+- Add the Pages route and deploy from GitHub.
+- Confirm DNS records create/update/delete successfully through the Cloudflare API.
