@@ -1,0 +1,40 @@
+CREATE TABLE root_domains (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  domain_name TEXT NOT NULL UNIQUE,
+  zone_id TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'active',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE subdomains (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  root_domain_id INTEGER NOT NULL,
+  prefix TEXT NOT NULL,
+  full_domain TEXT NOT NULL UNIQUE,
+  owner_user_id TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'active',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(root_domain_id) REFERENCES root_domains(id)
+);
+
+CREATE TABLE dns_records (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  subdomain_id INTEGER NOT NULL,
+  type TEXT NOT NULL,
+  name TEXT NOT NULL,
+  content TEXT NOT NULL,
+  ttl INTEGER NOT NULL DEFAULT 300,
+  proxied INTEGER NOT NULL DEFAULT 0,
+  cloudflare_record_id TEXT,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(subdomain_id) REFERENCES subdomains(id)
+);
+
+CREATE TABLE audit_logs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id TEXT NOT NULL,
+  action TEXT NOT NULL,
+  target TEXT NOT NULL,
+  diff TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

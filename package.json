@@ -1,0 +1,12 @@
+{
+  "name": "dns-saas-mvp",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler pages dev Frontend/Public",
+    "deploy": "wrangler pages deploy Frontend/Public --project-name dns-saas-mvp"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
