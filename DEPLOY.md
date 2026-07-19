@@ -85,3 +85,7 @@
 - On the first request, the app checks whether root_domains exists.
 - If not, it runs the full schema automatically with D1.exec().
 - This avoids manual first-run SQL execution.
+
+## First-load status
+- The dashboard shows a schema-ready banner before login.
+- Once the first request creates the tables, it switches to the login screen.
