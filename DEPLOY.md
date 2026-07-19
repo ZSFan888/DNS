@@ -106,3 +106,8 @@
 - Add indexes for dns_records(subdomain_id, type, name) and common search columns.
 - Use the /api/dns-records/search endpoint with pagination and prefetched next page handling.
 - Keep filtering scoped to a single subdomain for security and performance.
+
+## Bulk Actions
+- Use D1 batch() for bulk delete and TTL updates.
+- The UI supports multi-select record actions.
+- For mixed operations, keep them scoped to the current subdomain.
