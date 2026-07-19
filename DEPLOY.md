@@ -58,3 +58,8 @@
 - Admin sessions are stored in D1.
 - Use subdomain_access to grant non-admin users access to specific subdomains.
 - Add a bind-access endpoint for manual grants.
+
+## User Console
+- The dashboard includes an admin tab and a user tab.
+- Use the bind-access form to grant a user access to a subdomain.
+- In the next step, enforce canAccessSubdomain in record endpoints.
