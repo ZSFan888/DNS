@@ -53,3 +53,8 @@
 - Current scaffold stores admin sessions in D1.
 - Extend sessions.role to add user roles later.
 - Logout endpoint: POST /api/auth/logout.
+
+## Access Control
+- Admin sessions are stored in D1.
+- Use subdomain_access to grant non-admin users access to specific subdomains.
+- Add a bind-access endpoint for manual grants.

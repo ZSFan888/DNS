@@ -8,3 +8,9 @@ export async function ensureSession(request, env) {
   if (new Date(session.expires_at).getTime() < Date.now()) return new Response('Unauthorized', { status: 401 });
   return session;
 }
+
+export async function canAccessSubdomain(env, session, subdomainId) {
+  if (session.role === 'admin') return true;
+  const row = await env.DB.prepare('SELECT 1 FROM subdomain_access WHERE subdomain_id = ? AND user_id = ?').bind(subdomainId, session.user_id).first();
+  return !!row;
+}

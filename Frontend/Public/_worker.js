@@ -13,6 +13,10 @@ export async function onRequest({ request, env }) {
     const mod = await import('./api-auth-logout.js');
     return mod.onRequestPost({ request, env });
   }
+  if (url.pathname === '/api/bind-access') {
+    const mod = await import('./api-bind-access.js');
+    return mod.onRequestPost({ request, env });
+  }
   if (url.pathname === '/api/root-domains') {
     const mod = await import('./api-root-domains.js');
     return request.method === 'GET' ? mod.onRequestGet({ request, env }) : mod.onRequestPost({ request, env });
