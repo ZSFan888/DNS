@@ -42,3 +42,9 @@
 - 申请一个 subdomain。
 - 创建一条 A 或 CNAME 记录。
 - 确认 Cloudflare DNS 侧同步成功。
+
+
+## Auth
+- Add ADMIN_PASSWORD and AUTH_SECRET in Pages environment variables.
+- Bind D1 database as DB and run the schema to create sessions table.
+- Login returns a session id saved in a cookie named dns_session.
