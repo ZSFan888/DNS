@@ -59,6 +59,10 @@ export async function onRequest({ request, env }) {
     const mod = await import('./api-dns-records.js');
     return request.method === 'GET' ? mod.onRequestGet({ request, env, session }) : mod.onRequestPost({ request, env, session });
   }
+  if (url.pathname === '/api/dns-records/search') {
+    const mod = await import('./api-dns-records-search.js');
+    return mod.onRequestGet({ request, env, session });
+  }
   if (url.pathname.startsWith('/api/dns-records/')) {
     const mod = await import('./api-dns-records.js');
     if (request.method === 'PUT') return mod.onRequestPut({ request, env, session });

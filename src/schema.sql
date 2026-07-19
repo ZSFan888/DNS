@@ -12,3 +12,7 @@ CREATE TABLE IF NOT EXISTS audit_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, use
 CREATE INDEX IF NOT EXISTS idx_audit_created_at ON audit_logs(created_at);
 
 CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, password_hash TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'user', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+
+CREATE INDEX IF NOT EXISTS idx_dns_records_subdomain_type_name ON dns_records(subdomain_id, type, name);
+CREATE INDEX IF NOT EXISTS idx_dns_records_name ON dns_records(name);
+CREATE INDEX IF NOT EXISTS idx_dns_records_type ON dns_records(type);

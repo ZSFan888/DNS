@@ -101,3 +101,8 @@
 ## Access Revocation
 - Admins can revoke a user from a subdomain with POST /api/revoke-access.
 - The UI adds a revoke button next to the grant button.
+
+## Search & Filter
+- Add indexes for dns_records(subdomain_id, type, name) and common search columns.
+- Use the /api/dns-records/search endpoint with pagination and prefetched next page handling.
+- Keep filtering scoped to a single subdomain for security and performance.
