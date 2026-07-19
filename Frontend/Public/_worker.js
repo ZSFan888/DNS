@@ -19,6 +19,10 @@ export async function onRequest({ request, env }) {
     const mod = await import('./api-bind-access.js');
     return mod.onRequestPost({ request, env, session });
   }
+  if (url.pathname === '/api/revoke-access') {
+    const mod = await import('./api-revoke-access.js');
+    return mod.onRequestPost({ request, env, session });
+  }
   if (url.pathname === '/api/audit') {
     const mod = await import('./api-audit.js');
     return mod.onRequestGet({ request, env, session });

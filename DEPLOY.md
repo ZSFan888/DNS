@@ -97,3 +97,7 @@
 - Add the users table for password_hash storage.
 - The profile page includes old/new password fields.
 - Password changes are handled by POST /api/password.
+
+## Access Revocation
+- Admins can revoke a user from a subdomain with POST /api/revoke-access.
+- The UI adds a revoke button next to the grant button.
