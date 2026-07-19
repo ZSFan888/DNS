@@ -15,7 +15,11 @@ export async function onRequest({ request, env }) {
   }
   if (url.pathname === '/api/bind-access') {
     const mod = await import('./api-bind-access.js');
-    return mod.onRequestPost({ request, env });
+    return mod.onRequestPost({ request, env, session });
+  }
+  if (url.pathname === '/api/audit') {
+    const mod = await import('./api-audit.js');
+    return mod.onRequestGet({ request, env, session });
   }
   if (url.pathname === '/api/root-domains') {
     const mod = await import('./api-root-domains.js');

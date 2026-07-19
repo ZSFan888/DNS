@@ -28,6 +28,8 @@ function normalizeName(name, fullDomain) {
   return n.endsWith(fullDomain) ? n : `${n}.${fullDomain}`;
 }
 
+const { logAudit } = await import('./audit.js');
+
 async function getSubdomain(env, subdomainId) {
   return env.DB.prepare('SELECT s.id, s.full_domain, s.owner_user_id, s.status, r.domain_name FROM subdomains s JOIN root_domains r ON s.root_domain_id = r.id WHERE s.id = ?').bind(subdomainId).first();
 }
@@ -71,7 +73,7 @@ export async function onRequestPost({ request, env, session }) {
     .bind(subdomainId, type, name, content, ttl, proxied)
     .first();
   await syncToCloudflare(env, { id: res.id, subdomainId, type, name, content, ttl, proxied });
-  await env.DB.prepare('INSERT INTO audit_logs(user_id, action, target, diff) VALUES(?, ?, ?, ?)').bind(sub.owner_user_id, 'create', name, JSON.stringify({ type, content, ttl, proxied })).run();
+  await logAudit(env, session, 'create_record', name, { subdomainId, type, content, ttl, proxied });
   return Response.json({ ok: true, name, id: res.id });
 }
 
@@ -96,7 +98,7 @@ export async function onRequestPut({ request, env, session }) {
   await env.DB.prepare(`UPDATE dns_records SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`).bind(...binds).run();
   const next = { ...before, ...body };
   await syncToCloudflare(env, { id, subdomainId: record.subdomain_id, ...next });
-  await env.DB.prepare('INSERT INTO audit_logs(user_id, action, target, diff) VALUES(?, ?, ?, ?)').bind(String(record.subdomain_id), 'update', String(record.name), JSON.stringify({ before, after: next })).run();
+  await logAudit(env, session, 'update_record', String(record.name), { before, after: next });
   return Response.json({ ok: true });
 }
 
@@ -116,7 +118,7 @@ export async function onRequestDelete({ request, env, session }) {
       });
     }
   }
-  await env.DB.prepare('INSERT INTO audit_logs(user_id, action, target, diff) VALUES(?, ?, ?, ?)').bind(String(rec.subdomain_id), 'delete', String(id), JSON.stringify({ cloudflare_record_id: rec.cloudflare_record_id })).run();
+  await logAudit(env, session, 'delete_record', String(id), { cloudflare_record_id: rec.cloudflare_record_id });
   await env.DB.prepare('DELETE FROM dns_records WHERE id = ?').bind(id).run();
   return Response.json({ ok: true });
 }

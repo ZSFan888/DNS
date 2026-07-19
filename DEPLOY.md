@@ -63,3 +63,8 @@
 - The dashboard includes an admin tab and a user tab.
 - Use the bind-access form to grant a user access to a subdomain.
 - In the next step, enforce canAccessSubdomain in record endpoints.
+
+## Audit Log
+- Add the audit_logs table and bind D1.
+- Admins can view audit logs in the dashboard.
+- Record create/update/delete actions should call logAudit.
