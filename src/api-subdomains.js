@@ -14,7 +14,7 @@ export async function onRequestPost({ request, env }) {
   if (!/^[a-z0-9-]{1,63}$/.test(prefix) || prefix.startsWith('-') || prefix.endsWith('-')) return Response.json({ ok: false, error: 'invalid_prefix' }, { status: 400 });
   if (reserved.has(prefix)) return Response.json({ ok: false, error: 'reserved_prefix' }, { status: 400 });
 
-  const root = await env.DB.prepare('SELECT domain_name FROM root_domains WHERE id = ? AND status = 'active').bind(rootDomainId).first();
+  const root = await env.DB.prepare("SELECT domain_name FROM root_domains WHERE id = ? AND status = 'active'").bind(rootDomainId).first();
   if (!root) return Response.json({ ok: false, error: 'root_domain_not_found' }, { status: 404 });
 
   const fullDomain = `${prefix}.${root.domain_name}`;
