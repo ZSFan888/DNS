@@ -4,9 +4,17 @@ export async function onRequest({ request, env }) {
     const mod = await import('./api-root-domains.js');
     return request.method === 'GET' ? mod.onRequestGet({ request, env }) : mod.onRequestPost({ request, env });
   }
+  if (url.pathname.startsWith('/api/root-domains/')) {
+    const mod = await import('./api-root-domains.js');
+    if (request.method === 'DELETE') return mod.onRequestDelete({ request, env });
+  }
   if (url.pathname === '/api/subdomains') {
     const mod = await import('./api-subdomains.js');
     return request.method === 'GET' ? mod.onRequestGet({ request, env }) : mod.onRequestPost({ request, env });
+  }
+  if (url.pathname.startsWith('/api/subdomains/')) {
+    const mod = await import('./api-subdomains.js');
+    if (request.method === 'DELETE') return mod.onRequestDelete({ request, env });
   }
   if (url.pathname === '/api/dns-records') {
     const mod = await import('./api-dns-records.js');

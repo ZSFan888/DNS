@@ -12,3 +12,13 @@ export async function onRequestPost({ request, env }) {
   await env.DB.prepare('INSERT INTO root_domains(domain_name, zone_id) VALUES(?, ?)').bind(domain, zoneId).run();
   return Response.json({ ok: true });
 }
+
+
+export async function onRequestDelete({ request, env }) {
+  const url = new URL(request.url);
+  const id = Number(url.pathname.split('/').pop());
+  const rec = await env.DB.prepare('SELECT id FROM root_domains WHERE id = ?').bind(id).first();
+  if (!rec) return Response.json({ ok: false, error: 'not_found' }, { status: 404 });
+  await env.DB.prepare('DELETE FROM root_domains WHERE id = ?').bind(id).run();
+  return Response.json({ ok: true });
+}

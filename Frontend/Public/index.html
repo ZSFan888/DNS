@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DNS 分发平台控制台</title>
+  <title>DNS Control Center</title>
   <style>
-    body{margin:0;font-family:Inter,system-ui,sans-serif;background:#0b1020;color:#e8ecff}
+    body{margin:0;font-family:Inter,system-ui,sans-serif;background:linear-gradient(180deg,#080b14,#0f1730);color:#eef2ff}
     .wrap{max-width:1400px;margin:0 auto;padding:24px}
     .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
     .grid{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:16px}
@@ -21,24 +21,30 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><h1>DNS 分发平台</h1><div class="small">MVP 控制台</div></div>
-  <div class="grid">
+  <div class="top"><h1>DNS 分发平台</h1><div class="small">高颜值控制台</div></div>
+  <div class="grid" style="grid-template-columns:1fr 1fr 1.6fr">
     <section class="card"><h2>根域名</h2><div class="row"><input id="rd-domain" placeholder="example.com"><input id="rd-zone" placeholder="zone id"></div><button onclick="addRoot()">添加根域名</button><div id="roots"></div></section>
     <section class="card"><h2>子域名</h2><div class="row"><input id="sd-root" placeholder="root domain id"><input id="sd-prefix" placeholder="prefix"></div><input id="sd-owner" placeholder="owner user id" style="margin-bottom:10px"><button onclick="addSub()">申请子域名</button><div id="subs"></div></section>
-    <section class="card"><h2>DNS 记录</h2><div class="row"><input id="dr-sub" placeholder="subdomain id"><input id="dr-type" placeholder="A / CNAME / TXT"></div><div class="row"><input id="dr-name" placeholder="@ 或记录名"><input id="dr-ttl" placeholder="300"></div><input id="dr-content" placeholder="内容" style="margin-bottom:10px"><button onclick="addRecord()">添加记录</button><div id="records"></div></section>
+    <section class="card"><h2>DNS 记录</h2><div class="row"><input id="dr-sub" placeholder="subdomain id"><input id="dr-type" placeholder="A / CNAME / TXT"></div><div class="row"><input id="dr-name" placeholder="@ 或记录名"><input id="dr-ttl" placeholder="300"></div><input id="dr-content" placeholder="内容" style="margin-bottom:10px"><div class="row"><button onclick="addRecord()">添加记录</button><button onclick="loadRecords()" style="background:#2a3a80">查询记录</button></div><div id="records"></div></section>
   </div>
   <div class="card" style="margin-top:16px"><h2>调试输出</h2><pre id="log">ready</pre></div>
 </div>
 <script>
 const log = (v) => document.getElementById('log').textContent = typeof v === 'string' ? v : JSON.stringify(v, null, 2)
 async function api(url, method='GET', body){ const r = await fetch(url,{method,headers:{'Content-Type':'application/json'},body: body?JSON.stringify(body):undefined}); return await r.json() }
+async function loadRecords(){ const subId = dr_sub.value; if(!subId) return; const r = await api(`/api/dns-records?subdomain_id=${subId}`); renderRecords(r.data||[]) }
+function renderRecords(list){ document.getElementById('records').innerHTML = list.map(x=>`<div class="item">#${x.id} [${x.type}] ${x.name} -> ${x.content}<div class="small">ttl:${x.ttl} proxied:${x.proxied} updated:${x.updated_at}</div><div class="row" style="margin-top:8px"><input id="edit-content-${x.id}" placeholder="新内容" value="${x.content}"><button onclick="editRecord(${x.id})" style="background:#2a8f6b">保存</button></div><button onclick="delRecord(${x.id})" style="margin-top:8px;background:#ff4d6d">删除</button></div>`).join('') || '暂无记录' }
+async function editRecord(id){ const content = document.getElementById(`edit-content-${id}`).value; const r = await api(`/api/dns-records/${id}`,'PUT',{content}); log(r); loadRecords() }
+async function delRecord(id){ const r = await api(`/api/dns-records/${id}`,'DELETE'); log(r); loadRecords() }
 async function refresh(){
-  const roots = await api('/api/root-domains'); document.getElementById('roots').innerHTML = roots.data.map(x=>`<div class="item">#${x.id} ${x.domain_name}<div class="small">${x.status} ${x.created_at}</div></div>`).join('') || ''
-  const subs = await api('/api/subdomains'); document.getElementById('subs').innerHTML = subs.data.map(x=>`<div class="item">#${x.id} ${x.full_domain}<div class="small">root:${x.root_domain_id} owner:${x.owner_user_id}</div></div>`).join('') || ''
+  const roots = await api('/api/root-domains'); document.getElementById('roots').innerHTML = roots.data.map(x=>`<div class="item">#${x.id} ${x.domain_name}<div class="small">${x.status} ${x.created_at}</div><button onclick="delRoot(${x.id})" style="margin-top:8px;background:#ff4d6d">删除</button></div>`).join('') || ''
+  const subs = await api('/api/subdomains'); document.getElementById('subs').innerHTML = subs.data.map(x=>`<div class="item">#${x.id} ${x.full_domain}<div class="small">root:${x.root_domain_id} owner:${x.owner_user_id}</div><button onclick="delSub(${x.id})" style="margin-top:8px;background:#ff4d6d">删除</button></div>`).join('') || ''
 }
 async function addRoot(){ const v={domain_name:rd_domain.value,zone_id:rd_zone.value}; const r=await api('/api/root-domains','POST',v); log(r); refresh() }
 async function addSub(){ const v={root_domain_id:+sd_root.value,prefix:sd_prefix.value,owner_user_id:sd_owner.value}; const r=await api('/api/subdomains','POST',v); log(r); refresh() }
-async function addRecord(){ const v={subdomain_id:+dr_sub.value,type:dr_type.value,name:dr_name.value,content:dr_content.value,ttl:+dr_ttl.value||300}; const r=await api('/api/dns-records','POST',v); log(r); refresh() }
+async async function addRecord(){ const v={subdomain_id:+dr_sub.value,type:dr_type.value,name:dr_name.value,content:dr_content.value,ttl:+dr_ttl.value||300}; const r=await api('/api/dns-records','POST',v); log(r); loadRecords() }
+async function delRoot(id){ const r=await api(`/api/root-domains/${id}`,'DELETE'); log(r); refresh() }
+async function delSub(id){ const r=await api(`/api/subdomains/${id}`,'DELETE'); log(r); refresh() }
 refresh()
 </script>
 </body>

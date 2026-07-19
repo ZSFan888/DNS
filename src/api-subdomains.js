@@ -27,3 +27,13 @@ export async function onRequestPost({ request, env }) {
 
   return Response.json({ ok: true, full_domain: fullDomain });
 }
+
+
+export async function onRequestDelete({ request, env }) {
+  const url = new URL(request.url);
+  const id = Number(url.pathname.split('/').pop());
+  const rec = await env.DB.prepare('SELECT id FROM subdomains WHERE id = ?').bind(id).first();
+  if (!rec) return Response.json({ ok: false, error: 'not_found' }, { status: 404 });
+  await env.DB.prepare('DELETE FROM subdomains WHERE id = ?').bind(id).run();
+  return Response.json({ ok: true });
+}
