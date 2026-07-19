@@ -32,15 +32,22 @@ async function getSubdomain(env, subdomainId) {
   return env.DB.prepare('SELECT s.id, s.full_domain, s.owner_user_id, s.status, r.domain_name FROM subdomains s JOIN root_domains r ON s.root_domain_id = r.id WHERE s.id = ?').bind(subdomainId).first();
 }
 
-export async function onRequestGet({ request, env }) {
+async function canAccessSubdomain(env, session, subdomainId) {
+  if (session?.role === 'admin') return true;
+  const row = await env.DB.prepare('SELECT 1 FROM subdomain_access WHERE subdomain_id = ? AND user_id = ?').bind(subdomainId, session?.user_id).first();
+  return !!row;
+}
+
+export async function onRequestGet({ request, env, session }) {
   const url = new URL(request.url);
   const subdomainId = Number(url.searchParams.get('subdomain_id'));
   if (!subdomainId) return Response.json({ ok: false, error: 'missing_subdomain_id' }, { status: 400 });
+  if (!(await canAccessSubdomain(env, session, subdomainId))) return Response.json({ ok: false, error: 'forbidden' }, { status: 403 });
   const rows = await env.DB.prepare('SELECT id, type, name, content, ttl, proxied, updated_at FROM dns_records WHERE subdomain_id = ? ORDER BY id DESC').bind(subdomainId).all();
   return Response.json({ ok: true, data: rows.results });
 }
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, session }) {
   const body = await request.json().catch(() => null);
   const subdomainId = Number(body?.subdomain_id);
   const type = String(body?.type || '').trim().toUpperCase();
@@ -54,6 +61,7 @@ export async function onRequestPost({ request, env }) {
 
   const sub = await getSubdomain(env, subdomainId);
   if (!sub || sub.status !== 'active') return Response.json({ ok: false, error: 'subdomain_not_found' }, { status: 404 });
+  if (!(await canAccessSubdomain(env, session, subdomainId))) return Response.json({ ok: false, error: 'forbidden' }, { status: 403 });
 
   const name = normalizeName(rawName, sub.full_domain);
   const duplicate = await env.DB.prepare('SELECT id FROM dns_records WHERE subdomain_id = ? AND type = ? AND name = ?').bind(subdomainId, type, name).first();
@@ -67,12 +75,14 @@ export async function onRequestPost({ request, env }) {
   return Response.json({ ok: true, name, id: res.id });
 }
 
-export async function onRequestPut({ request, env }) {
+export async function onRequestPut({ request, env, session }) {
   const url = new URL(request.url);
   const id = Number(url.pathname.split('/').pop());
   const body = await request.json().catch(() => null);
   const record = await env.DB.prepare('SELECT * FROM dns_records WHERE id = ?').bind(id).first();
   if (!record) return Response.json({ ok: false, error: 'record_not_found' }, { status: 404 });
+  if (!(await canAccessSubdomain(env, session, record.subdomain_id))) return Response.json({ ok: false, error: 'forbidden' }, { status: 403 });
+  if (!(await canAccessSubdomain(env, session, record.subdomain_id))) return Response.json({ ok: false, error: 'forbidden' }, { status: 403 });
   const updates = [];
   const binds = [];
   const before = { type: record.type, name: record.name, content: record.content, ttl: record.ttl, proxied: record.proxied };
@@ -90,11 +100,12 @@ export async function onRequestPut({ request, env }) {
   return Response.json({ ok: true });
 }
 
-export async function onRequestDelete({ request, env }) {
+export async function onRequestDelete({ request, env, session }) {
   const url = new URL(request.url);
   const id = Number(url.pathname.split('/').pop());
   const record = await env.DB.prepare('SELECT id FROM dns_records WHERE id = ?').bind(id).first();
   if (!record) return Response.json({ ok: false, error: 'record_not_found' }, { status: 404 });
+  if (!(await canAccessSubdomain(env, session, record.subdomain_id))) return Response.json({ ok: false, error: 'forbidden' }, { status: 403 });
   const rec = await env.DB.prepare('SELECT cloudflare_record_id, subdomain_id FROM dns_records WHERE id = ?').bind(id).first();
   if (rec?.cloudflare_record_id && env.CF_API_TOKEN) {
     const root = await env.DB.prepare('SELECT r.zone_id FROM subdomains s JOIN root_domains r ON s.root_domain_id = r.id WHERE s.id = ?').bind(rec.subdomain_id).first();

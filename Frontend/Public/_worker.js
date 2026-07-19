@@ -19,7 +19,7 @@ export async function onRequest({ request, env }) {
   }
   if (url.pathname === '/api/root-domains') {
     const mod = await import('./api-root-domains.js');
-    return request.method === 'GET' ? mod.onRequestGet({ request, env }) : mod.onRequestPost({ request, env });
+    return request.method === 'GET' ? mod.onRequestGet({ request, env, session }) : mod.onRequestPost({ request, env, session });
   }
   if (url.pathname.startsWith('/api/root-domains/')) {
     const mod = await import('./api-root-domains.js');
@@ -27,7 +27,7 @@ export async function onRequest({ request, env }) {
   }
   if (url.pathname === '/api/subdomains') {
     const mod = await import('./api-subdomains.js');
-    return request.method === 'GET' ? mod.onRequestGet({ request, env }) : mod.onRequestPost({ request, env });
+    return request.method === 'GET' ? mod.onRequestGet({ request, env, session }) : mod.onRequestPost({ request, env, session });
   }
   if (url.pathname.startsWith('/api/subdomains/')) {
     const mod = await import('./api-subdomains.js');
@@ -35,12 +35,12 @@ export async function onRequest({ request, env }) {
   }
   if (url.pathname === '/api/dns-records') {
     const mod = await import('./api-dns-records.js');
-    return request.method === 'GET' ? mod.onRequestGet({ request, env }) : mod.onRequestPost({ request, env });
+    return request.method === 'GET' ? mod.onRequestGet({ request, env, session }) : mod.onRequestPost({ request, env, session });
   }
   if (url.pathname.startsWith('/api/dns-records/')) {
     const mod = await import('./api-dns-records.js');
-    if (request.method === 'PUT') return mod.onRequestPut({ request, env });
-    if (request.method === 'DELETE') return mod.onRequestDelete({ request, env });
+    if (request.method === 'PUT') return mod.onRequestPut({ request, env, session });
+    if (request.method === 'DELETE') return mod.onRequestDelete({ request, env, session });
   }
   return new Response('Not Found', { status: 404 });
 }
