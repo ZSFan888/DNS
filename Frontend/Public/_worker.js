@@ -1,76 +1,39 @@
 export async function onRequest({ request, env }) {
   const url = new URL(request.url);
   const { ensureSchema } = await import('../../src/schema-init.js');
-  await ensureSchema(env);
   const { ensureSession } = await import('../../src/auth.js');
+  const { logAudit } = await import('../../src/audit.js');
+  await ensureSchema(env);
   const session = await ensureSession(request, env);
   if (session instanceof Response) return session;
-
-  const url = new URL(request.url);
-  if (url.pathname === '/api/auth/login') {
-    const mod = await import('./api-auth.js');
-    return mod.onRequestPost({ request, env });
-  }
-  if (url.pathname === '/api/auth/logout') {
-    const mod = await import('./api-auth-logout.js');
-    return mod.onRequestPost({ request, env });
-  }
-  if (url.pathname === '/api/bind-access') {
-    const mod = await import('./api-bind-access.js');
-    return mod.onRequestPost({ request, env, session });
-  }
-  if (url.pathname === '/api/revoke-access') {
-    const mod = await import('./api-revoke-access.js');
-    return mod.onRequestPost({ request, env, session });
-  }
-  if (url.pathname === '/api/audit') {
-    const mod = await import('./api-audit.js');
-    return mod.onRequestGet({ request, env, session });
-  }
-  if (url.pathname === '/api/my-subdomains') {
-    const mod = await import('./api-my-subdomains.js');
-    return mod.onRequestGet({ request, env, session });
-  }
-  if (url.pathname === '/api/me') {
-    const mod = await import('./api-me.js');
-    return mod.onRequestGet({ request, env, session });
-  }
-  if (url.pathname === '/api/password') {
-    const mod = await import('./api-password.js');
-    return mod.onRequestPost({ request, env, session });
-  }
+  if (url.pathname === '/api/auth/login') return (await import('../../src/api-auth.js')).onRequestPost({ request, env });
+  if (url.pathname === '/api/auth/logout') return (await import('../../src/api-auth-logout.js')).onRequestPost({ request, env, session });
+  if (url.pathname === '/api/bind-access') return (await import('../../src/api-bind-access.js')).onRequestPost({ request, env, session });
+  if (url.pathname === '/api/revoke-access') return (await import('../../src/api-revoke-access.js')).onRequestPost({ request, env, session });
+  if (url.pathname === '/api/audit') return (await import('../../src/api-audit.js')).onRequestGet({ request, env, session });
+  if (url.pathname === '/api/my-subdomains') return (await import('../../src/api-my-subdomains.js')).onRequestGet({ request, env, session });
+  if (url.pathname === '/api/me') return (await import('../../src/api-me.js')).onRequestGet({ request, env, session });
+  if (url.pathname === '/api/password') return (await import('../../src/api-password.js')).onRequestPost({ request, env, session });
   if (url.pathname === '/api/root-domains') {
-    const mod = await import('./api-root-domains.js');
+    const mod = await import('../../src/api-root-domains.js');
     return request.method === 'GET' ? mod.onRequestGet({ request, env, session }) : mod.onRequestPost({ request, env, session });
   }
-  if (url.pathname.startsWith('/api/root-domains/')) {
-    const mod = await import('./api-root-domains.js');
-    if (request.method === 'DELETE') return mod.onRequestDelete({ request, env });
-  }
+  if (url.pathname.startsWith('/api/root-domains/')) return (await import('../../src/api-root-domains.js')).onRequestDelete({ request, env, session });
   if (url.pathname === '/api/subdomains') {
-    const mod = await import('./api-subdomains.js');
+    const mod = await import('../../src/api-subdomains.js');
     return request.method === 'GET' ? mod.onRequestGet({ request, env, session }) : mod.onRequestPost({ request, env, session });
   }
-  if (url.pathname.startsWith('/api/subdomains/')) {
-    const mod = await import('./api-subdomains.js');
-    if (request.method === 'DELETE') return mod.onRequestDelete({ request, env });
-  }
+  if (url.pathname.startsWith('/api/subdomains/')) return (await import('../../src/api-subdomains.js')).onRequestDelete({ request, env, session });
   if (url.pathname === '/api/dns-records') {
-    const mod = await import('./api-dns-records.js');
+    const mod = await import('../../src/api-dns-records.js');
     return request.method === 'GET' ? mod.onRequestGet({ request, env, session }) : mod.onRequestPost({ request, env, session });
-  }
-  if (url.pathname === '/api/dns-records/search') {
-    const mod = await import('./api-dns-records-search.js');
-    return mod.onRequestGet({ request, env, session });
-  }
-  if (url.pathname === '/api/bulk-records') {
-    const mod = await import('./api-bulk-records.js');
-    return mod.onRequestPost({ request, env, session });
   }
   if (url.pathname.startsWith('/api/dns-records/')) {
-    const mod = await import('./api-dns-records.js');
+    const mod = await import('../../src/api-dns-records.js');
     if (request.method === 'PUT') return mod.onRequestPut({ request, env, session });
     if (request.method === 'DELETE') return mod.onRequestDelete({ request, env, session });
   }
-  return new Response('Not Found', { status: 404 });
+  if (url.pathname === '/api/dns-records/search') return (await import('../../src/api-dns-records-search.js')).onRequestGet({ request, env, session });
+  if (url.pathname === '/api/bulk-records') return (await import('../../src/api-bulk-records.js')).onRequestPost({ request, env, session });
+  return new Response(await (await fetch(new URL('./index.html', request.url))).text(), { headers: { 'content-type': 'text/html;charset=UTF-8' } });
 }
