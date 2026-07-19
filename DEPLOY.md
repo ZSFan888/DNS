@@ -68,3 +68,7 @@
 - Add the audit_logs table and bind D1.
 - Admins can view audit logs in the dashboard.
 - Record create/update/delete actions should call logAudit.
+
+## Pagination
+- Audit logs use LIMIT + OFFSET with a small page size.
+- The user console queries /api/my-subdomains to avoid leaking other tenants.
