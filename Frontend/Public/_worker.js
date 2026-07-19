@@ -27,6 +27,10 @@ export async function onRequest({ request, env }) {
     const mod = await import('./api-my-subdomains.js');
     return mod.onRequestGet({ request, env, session });
   }
+  if (url.pathname === '/api/me') {
+    const mod = await import('./api-me.js');
+    return mod.onRequestGet({ request, env, session });
+  }
   if (url.pathname === '/api/root-domains') {
     const mod = await import('./api-root-domains.js');
     return request.method === 'GET' ? mod.onRequestGet({ request, env, session }) : mod.onRequestPost({ request, env, session });

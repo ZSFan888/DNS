@@ -89,3 +89,6 @@
 ## First-load status
 - The dashboard shows a schema-ready banner before login.
 - Once the first request creates the tables, it switches to the login screen.
+
+## Profile Page
+- The My Info panel shows current user id, role, owned subdomains, grants, and session expiration.
