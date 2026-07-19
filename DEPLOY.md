@@ -48,3 +48,8 @@
 - Add ADMIN_PASSWORD and AUTH_SECRET in Pages environment variables.
 - Bind D1 database as DB and run the schema to create sessions table.
 - Login returns a session id saved in a cookie named dns_session.
+
+## Roles
+- Current scaffold stores admin sessions in D1.
+- Extend sessions.role to add user roles later.
+- Logout endpoint: POST /api/auth/logout.

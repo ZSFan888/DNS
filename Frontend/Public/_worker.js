@@ -1,12 +1,16 @@
 export async function onRequest({ request, env }) {
   const url = new URL(request.url);
-  const { requireAuth } = await import('../../src/auth.js');
-  const forbidden = await requireAuth(request, env);
-  if (forbidden) return forbidden;
+  const { ensureSession } = await import('../../src/auth.js');
+  const session = await ensureSession(request, env);
+  if (session instanceof Response) return session;
 
   const url = new URL(request.url);
   if (url.pathname === '/api/auth/login') {
     const mod = await import('./api-auth.js');
+    return mod.onRequestPost({ request, env });
+  }
+  if (url.pathname === '/api/auth/logout') {
+    const mod = await import('./api-auth-logout.js');
     return mod.onRequestPost({ request, env });
   }
   if (url.pathname === '/api/root-domains') {
